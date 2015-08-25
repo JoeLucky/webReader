@@ -5,6 +5,7 @@ $().ready(function () {
 //这里存放get/post请求
     var first = 1;//标志是否第一次点一本书
     var saveInformation = null; //存储当前用户 在ecm_order_goods表中的相关信息
+    var choosebook = -1; //已选择的书序号 从0开始
     /**
      * 登录验证
      */
@@ -58,6 +59,10 @@ $().ready(function () {
 //                            return;
 //                        }
                         return function () {//闭包
+                            var canread = 1;
+                            if (choosebook === i) { //如果当前书是已经选择了的 那么不刷新了。
+                                return;
+                            }
                             var infor = text[i];
                             var str = '';
                             switch (infor.fac) {
@@ -65,6 +70,7 @@ $().ready(function () {
                                     str += '可看总次数：' + infor.fcs * infor.quantity + ';';
                                     if (infor.fcs * infor.quantity == infor.fview) {
                                         alert(str += '您的使用次数已耗尽，请重新购买！');
+                                        canread = 0;
                                     } else {
                                         str += '当前还可以看' + (infor.fcs * infor.quantity - infor.fview++) + '次';
                                         //infor.fview = infor.fview -1 ;
@@ -80,18 +86,21 @@ $().ready(function () {
                                     str += '该书数据库信息缺失（可能为测试数据）';
                             }
                             //返回文件地址
-                            $.post("/verify/queryFile", '' + infor.goods_id, function (text, status) {
-                                str += '\n' + '文件地址：';
-                                for (var x in text) {
-                                    if (text[x].file_path) {
-                                        str += '\n' + text[x].file_path;
-                                        pdfDoc = new ShowBook(text[x].file_path, first);
-                                        first = 0;
-                                        //console.log('文件地址：' + text[x].file_path);
+                            if (canread) {
+                                choosebook = i;
+                                $.post("/verify/queryFile", '' + infor.goods_id, function (text, status) {
+                                    str += '\n' + '文件地址：';
+                                    for (var x in text) {
+                                        if (text[x].file_path) {
+                                            str += '\n' + text[x].file_path;
+                                            pdfDoc = new ShowBook(text[x].file_path, first);
+                                            first = 0;
+                                            //console.log('文件地址：' + text[x].file_path);
+                                        }
                                     }
-                                }
-                                //alert(str);
-                            })
+                                    //alert(str);
+                                })
+                            }
                         }
                     }(i));
                     newDiv.appendTo($('#books'));
@@ -143,8 +152,8 @@ $().ready(function () {
         //中间的图片 和右边的按钮处理
         first = 1;
         $('#viewer-container *').remove();
-        var newDiv = $('<div>').attr('id','firstDiv');
-        $('<img>').attr('id','firstPicture').attr('src','./images/wait.gif').appendTo(newDiv);
+        var newDiv = $('<div>').attr('id', 'firstDiv');
+        $('<img>').attr('id', 'firstPicture').attr('src', './images/wait.gif').appendTo(newDiv);
         newDiv.appendTo($('#viewer-container'));
         $('#wait').addClass('hide');
         $('#menuBtn').addClass('hide');
@@ -156,8 +165,12 @@ $().ready(function () {
         window.open('http://221.5.4.232', '_self');
     })
     var alreadyLogin = document.cookie;
-    if (alreadyLogin.indexOf('name') != -1) {
-        var name = alreadyLogin.split('=')[1];
+    //console.log(alreadyLogin)
+    if (alreadyLogin.indexOf('name=') != -1) {
+        var name = '';
+        for (i = alreadyLogin.indexOf('name=') + 5; i < alreadyLogin.length && alreadyLogin[i] != ';'; i++) {
+            name += alreadyLogin[i];
+        }
         changeInformation(name);
         showOrderBooks(name);
     }

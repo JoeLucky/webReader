@@ -3,6 +3,7 @@
  * 通过promise异步下载pdf
  */
 function ShowBook(url, first) {   //对外提供接口pdfDoc
+    url = 'http://221.5.4.232:3000/' + url; //url处理
     currPage = 1;
     $("#menuList *").remove();
     //outline = null;
@@ -68,7 +69,7 @@ function renderPage(num) {
         var ctx = canvas.getContext('2d');
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-        if(averHeight > canvas.height) {
+        if (averHeight > canvas.height) {
             averHeight = canvas.height;
         }
         // 把当前页渲染进canvas上下文环境
@@ -380,17 +381,17 @@ $("#menuList").on('click', 'ul>li a', function () {
 document.getElementById('prev').addEventListener('click', function () {
     var nowID = $("#page" + currPage).attr("id");
     if (nowID) {
-        if(currPage == 1) {
+        if (currPage == 1) {
             return;
         }
         nowID = +nowID.substr(4);
         location.href = "#page" + (nowID - 1);
-        if(currPage == pdfDoc.numPages) {
+        if (currPage == pdfDoc.numPages) {
             currPage--;
             changePro(currPage);
             return;
         }
-        if(currPage == 2) {
+        if (currPage == 2) {
             currPage--;
             changePro(currPage);
             return;
@@ -400,12 +401,12 @@ document.getElementById('prev').addEventListener('click', function () {
 document.getElementById('next').addEventListener('click', function () {
     var nowID = $("#page" + currPage).attr("id");
     if (nowID) {
-        if(currPage == pdfDoc.numPages) {
+        if (currPage == pdfDoc.numPages) {
             return;
         }
         nowID = +nowID.substr(4);
         location.href = "#page" + (nowID + 1);
-        if(currPage == 1) {
+        if (currPage == 1) {
             currPage++;
             changePro(currPage);
         }
@@ -419,7 +420,7 @@ window.addEventListener('scroll', function () {
     }
 
     if (checkScrollDown()) {//滚动条向下的情况
-        if(currPage == pdfDoc.numPages ) {
+        if (currPage == pdfDoc.numPages) {
             return;
         }
         if (currPage == pdfDoc.numPages - 1) { //加载完了
@@ -427,7 +428,7 @@ window.addEventListener('scroll', function () {
             changePro(currPage);
             return;
         }
-        if(currPage == 1) {
+        if (currPage == 1) {
             currPage++;
             changePro(currPage);
         }
@@ -447,7 +448,7 @@ window.addEventListener('scroll', function () {
         if (currPage < CHUNK) { //开始的情况不会补页
             return;
         }
-        if(currPage == 1) changePro(currPage);
+        if (currPage == 1) changePro(currPage);
         var canvas = document.createElement('canvas');
         canvas.setAttribute('id', 'page' + (Number(currPage) - 2)); //注意ID的分配
         viewer.insertBefore(canvas, viewer.childNodes[0]);
@@ -457,7 +458,7 @@ window.addEventListener('scroll', function () {
         //viewer.lastChild.remove();
         viewer.lastChild.parentNode.removeChild(viewer.lastChild);
         //console.log('往上');
-        $(document).scrollTop($(document).scrollTop()+averHeight);//删完记得让页面滚下去1页
+        $(document).scrollTop($(document).scrollTop() + averHeight);//删完记得让页面滚下去1页
     }
     function checkScrollDown() {
         var scrollTop = $(document).scrollTop();       //滚动高度
